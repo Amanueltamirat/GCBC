@@ -1,11 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { PlayCircle } from 'lucide-react';
+import { PlayCircle, Plus } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
 import { PLACEHOLDER_YOUTUBE_ID } from '../../data/sermons';
-import PageHeader from '../../components/PageHeader';
 
 export default function SermonsList() {
   const { sermons } = useContent();
@@ -14,13 +13,38 @@ export default function SermonsList() {
   return (
     <div>
       <Helmet><title>Sermons · GCBC</title></Helmet>
-      <PageHeader
-        title="Sermons"
-        subtitle="Audio and video messages from Sunday gatherings."
-        cta={isAdmin ? { to: '/sermons/new', label: 'New Sermon' } : null}
-      />
 
-      <div className="mx-auto max-w-content px-5 sm:px-8 pb-16">
+      {/* Hero */}
+      <section
+        className="relative flex min-h-[320px] items-end bg-cover bg-center text-white"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1438032005730-c779502df39b?w=1600&q=80')",
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/30" />
+        <div className="relative mx-auto max-w-content w-full px-5 sm:px-8 pb-12 flex items-end justify-between gap-4 flex-wrap">
+          <div>
+            <p className="text-accent font-semibold tracking-wide uppercase text-sm mb-3">
+              Audio & video
+            </p>
+            <h1 className="text-4xl sm:text-5xl font-extrabold">Sermons</h1>
+            <p className="mt-2 text-white/80 max-w-md">
+              Messages from Sunday gatherings, preached from the Word.
+            </p>
+          </div>
+          {isAdmin && (
+            <Link
+              to="/sermons/new"
+              className="flex items-center gap-1.5 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-white hover:bg-accent-dark"
+            >
+              <Plus size={16} /> New Sermon
+            </Link>
+          )}
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-content px-5 sm:px-8 py-12">
         {sermons.length === 0 ? (
           <p className="text-muted">No sermons yet.</p>
         ) : (

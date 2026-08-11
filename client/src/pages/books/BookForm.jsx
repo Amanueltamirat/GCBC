@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useContent } from '../../context/ContentContext';
 
-const EMPTY = { title: '', author: '', cover: '', overview: '', fileUrl: '#' };
+const EMPTY = { title: '', author: '', cover: '', overview: '', readUrl: '', downloadUrl: '' };
 
 export default function BookForm({ mode }) {
   const isUpdate = mode === 'update';
@@ -16,7 +16,7 @@ export default function BookForm({ mode }) {
   useEffect(() => {
     if (isUpdate) {
       const existing = getById('books', id);
-      if (existing) setFields(existing);
+      if (existing) setFields({ ...EMPTY, ...existing });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -43,7 +43,20 @@ export default function BookForm({ mode }) {
         <Field label="Title" value={fields.title} onChange={setField('title')} required />
         <Field label="Author" value={fields.author} onChange={setField('author')} required />
         <Field label="Cover image URL" value={fields.cover} onChange={setField('cover')} />
-        <Field label="Book file URL (PDF)" value={fields.fileUrl} onChange={setField('fileUrl')} />
+
+        <Field
+          label="Read online URL"
+          value={fields.readUrl}
+          onChange={setField('readUrl')}
+          hint="A direct link to a PDF or HTML version — embedded in an in-browser reader. Leave blank to show 'not available yet.'"
+        />
+        <Field
+          label="Download URL"
+          value={fields.downloadUrl}
+          onChange={setField('downloadUrl')}
+          hint="Opens/downloads in a new tab. Leave blank to show 'not available yet.'"
+        />
+
         <div>
           <label htmlFor="overview" className="block text-sm font-medium text-ink mb-1">Overview</label>
           <textarea id="overview" rows={5} value={fields.overview} onChange={setField('overview')} required className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent" />
@@ -56,12 +69,13 @@ export default function BookForm({ mode }) {
   );
 }
 
-function Field({ label, value, onChange, required }) {
+function Field({ label, value, onChange, required, hint }) {
   const id = label.toLowerCase().replace(/\s+/g, '-');
   return (
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-ink mb-1">{label}</label>
       <input id={id} value={value} onChange={onChange} required={required} className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent" />
+      {hint && <p className="mt-1 text-xs text-muted">{hint}</p>}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Pencil, Trash2, BookOpenText } from 'lucide-react';
+import { Pencil, Trash2, BookOpenText, Download } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
@@ -41,12 +41,47 @@ export default function BookDetail() {
           <p className="text-muted mb-6">by {book.author}</p>
           <p className="text-ink/80 leading-relaxed mb-8">{book.overview}</p>
 
-          <a
-            href={book.fileUrl}
-            className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-dark"
-          >
-            <BookOpenText size={18} /> Read Book
-          </a>
+          <div className="flex flex-wrap gap-3">
+            {book.readUrl ? (
+              <Link
+                to={`/books/${book.id}/read`}
+                className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-dark"
+              >
+                <BookOpenText size={18} /> Read Online
+              </Link>
+            ) : (
+              <span
+                title="Not available online yet"
+                className="inline-flex items-center gap-2 rounded-md bg-border px-5 py-2.5 font-semibold text-muted cursor-not-allowed"
+              >
+                <BookOpenText size={18} /> Read Online
+              </span>
+            )}
+
+            {book.downloadUrl ? (
+              <a
+                href={book.downloadUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 font-semibold text-ink hover:bg-paper-2"
+              >
+                <Download size={18} /> Download
+              </a>
+            ) : (
+              <span
+                title="Not available for download yet"
+                className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 font-semibold text-muted cursor-not-allowed"
+              >
+                <Download size={18} /> Download
+              </span>
+            )}
+          </div>
+
+          {!book.readUrl && !book.downloadUrl && (
+            <p className="text-sm text-muted mt-3">
+              This title isn't available to read or download online yet.
+            </p>
+          )}
 
           {isAdmin && (
             <div className="mt-10 flex gap-3 pt-8 border-t border-border">

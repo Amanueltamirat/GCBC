@@ -27,10 +27,10 @@ import ArticleForm from './pages/articles/ArticleForm';
 import BooksList from './pages/books/BooksList';
 import BookDetail from './pages/books/BookDetail';
 import BookForm from './pages/books/BookForm';
-
-import MembersFeed from './members/MembersFeed';
-import MemberPostForm from './members/MemberPostForm';
 import ReadBook from './pages/books/ReadBook';
+
+import MembersFeed from './pages/members/MembersFeed';
+import MemberPostForm from './pages/members/MemberPostForm';
 
 function App() {
   return (
@@ -62,24 +62,12 @@ function App() {
                   <Route path="/books/new" element={<ProtectedRoute role="admin"><BookForm mode="create" /></ProtectedRoute>} />
                   <Route path="/books/:id" element={<BookDetail />} />
                   <Route path="/books/:id/edit" element={<ProtectedRoute role="admin"><BookForm mode="update" /></ProtectedRoute>} />
-                  <Route path='/books/:id/read' element={
-                    <ProtectedRoute>
-                      <ReadBook/>
-                    </ProtectedRoute>
-                  }/>
+                  <Route path="/books/:id/read" element={<ReadBook />} />
 
                   <Route path="/members" element={<ProtectedRoute role="member"><MembersFeed /></ProtectedRoute>} />
-                  <Route path='/members/new' element= {<ProtectedRoute role='admin'>
-                    <MemberPostForm mode='create' />
-                  </ProtectedRoute>}
-                  />
+                  <Route path="/members/new" element={<ProtectedRoute role="admin"><MemberPostForm mode="create" /></ProtectedRoute>} />
+                  <Route path="/members/:id/edit" element={<ProtectedRoute role="admin"><MemberPostForm mode="update" /></ProtectedRoute>} />
 
-                  <Route path='/members/:id/edit' element={
-                    <ProtectedRoute role='admin'>
-                      <MemberPostForm mode='update'/>
-                    </ProtectedRoute>
-                  }
-                  />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
