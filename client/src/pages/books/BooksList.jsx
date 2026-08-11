@@ -22,14 +22,14 @@ export default function BooksList() {
         {books.length === 0 ? (
           <p className="text-muted">No books yet.</p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 transition-all">
             {books.map((book) => (
               <Link
                 key={book.id}
                 to={`/books/${book.id}`}
                 className="group rounded-lg overflow-hidden border border-border hover:shadow-md transition-shadow"
               >
-                <img src={book.cover} alt="" className="h-56 w-full object-cover" />
+                <img src={book.cover} alt="" className="h-56 w-full object-cover hover:scale-105" />
                 <div className="p-4">
                   <h3 className="font-bold text-ink leading-snug group-hover:text-accent">{book.title}</h3>
                   <p className="mt-1 text-sm text-muted">{book.author}</p>

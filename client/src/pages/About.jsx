@@ -89,7 +89,7 @@ export default function About() {
       </Section>
 
       {/* Leadership */}
-      <Section id="leadership" eyebrow="Who leads us" title="Leadership" alt>
+      <Section class='leadership' id="leadership" eyebrow="Who leads us" title="Leadership" alt>
         <div className="grid gap-6 sm:grid-cols-3 max-w-3xl">
           {leadership.map((person) => (
             <div key={person.name} className="text-center">
