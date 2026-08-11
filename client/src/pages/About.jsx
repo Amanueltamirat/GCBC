@@ -13,11 +13,11 @@ const SECTIONS = [
 export default function About() {
   return (
     <div>
-      <Helmet><title>About · Soddo Baptist Church</title></Helmet>
+      <Helmet><title>About · GCBC</title></Helmet>
 
       {/* Hero */}
       <section
-        className="relative flex min-h-105 items-end bg-cover bg-center text-white"
+        className="relative flex min-h-80 items-end bg-cover bg-center text-white"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1543429257-6ac2fda07f61?w=1600&q=80')",
@@ -25,13 +25,13 @@ export default function About() {
       >
         <div className="absolute inset-0 bg-linear-to-t from-ink via-ink/70 to-ink/30" />
         <div className="relative mx-auto max-w-content w-full px-5 sm:px-8 pb-14">
-          <p className="text-accent font-semibold tracking-wide uppercase text-sm mb-3">
+          <p className="text-amber-700 font-semibold tracking-wide uppercase text-sm mb-3">
             Wolaita Soddo, Ethiopia
           </p>
           <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight">
             Welcome to <span className="italic font-semibold">Grace Community Baptist</span> Church
           </h1>
-          <p className="mt-4 max-w-xl text-lg text-white/80">
+          <p className="mt-4 max-w-xl text-lg text-white/80 italic">
             A reformed Baptist congregation, gathered around the Word since 2018.
           </p>
         </div>

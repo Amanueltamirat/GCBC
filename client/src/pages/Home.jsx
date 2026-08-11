@@ -27,7 +27,7 @@ export default function Home() {
 
   return (
     <>
-      <Helmet><title>Soddo Baptist Church</title></Helmet>
+      <Helmet><title>GCBC</title></Helmet>
 
       {/* Hero */}
       <section className="relative overflow-hidden text-white min-h-140 flex items-center">
@@ -135,7 +135,7 @@ export default function Home() {
                 to={`/articles/${article.id}`}
                 className="group rounded-lg bg-paper overflow-hidden border border-border hover:shadow-md transition-shadow"
               >
-                <img src={article.image} alt="" className="h-40 w-full object-cover" />
+                <img src={article.image} alt="" className="h-40 w-full object-cover transition-all hover:scale-105" />
                 <div className="p-4">
                   <h3 className="font-bold text-ink leading-snug group-hover:text-accent">{article.title}</h3>
                   <p className="mt-1 text-sm text-muted line-clamp-2">{article.excerpt}</p>

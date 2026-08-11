@@ -23,17 +23,17 @@ export default function Contact() {
 
   return (
     <div>
-      <Helmet><title>Contact · Soddo Baptist Church</title></Helmet>
+      <Helmet><title>Contact · GCBC</title></Helmet>
 
       {/* Hero */}
       <section
-        className="relative flex min-h-[320px] items-end bg-cover bg-center text-white"
+        className="relative flex min-h-80 items-end bg-cover bg-center text-white"
         style={{
           backgroundImage:
             "url('https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=1600&q=80')",
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/70 to-ink/30" />
+        <div className="absolute inset-0 bg-linear-to-t from-ink via-ink/70 to-ink/30" />
         <div className="relative mx-auto max-w-content w-full px-5 sm:px-8 pb-12">
           <p className="text-accent font-semibold tracking-wide uppercase text-sm mb-3">
             We'd love to hear from you
@@ -86,7 +86,7 @@ export default function Contact() {
               recolored without a paid Maps JS API key — this filter-based
               approach gets a deliberate, on-brand look without one. */}
           <div className="relative rounded-lg border border-border overflow-hidden shadow-sm group">
-            <div className="aspect-[4/3] sm:aspect-video">
+            <div className="aspect-4/3 sm:aspect-video">
               <iframe
                 title="Soddo Baptist Church location"
                 className="h-full w-full grayscale contrast-[1.05] group-hover:grayscale-0 group-focus-within:grayscale-0 transition-[filter] duration-500"

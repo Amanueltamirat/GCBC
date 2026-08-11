@@ -13,7 +13,7 @@ const leadership = [
   },
   {
     name: 'Bekele Babulo',
-    title: 'Deacon, Women\u2019s Ministry',
+    title: 'Deacon, Youth\u2019s Ministry',
     photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
   },
 ];

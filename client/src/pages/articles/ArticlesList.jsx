@@ -11,7 +11,7 @@ export default function ArticlesList() {
 
   return (
     <div>
-      <Helmet><title>Articles · Soddo Baptist Church</title></Helmet>
+      <Helmet><title>Articles · GCBC</title></Helmet>
       <PageHeader
         title="Articles"
         subtitle="Teaching and reflection from our pastors and members."

@@ -13,7 +13,7 @@ export default function SermonsList() {
 
   return (
     <div>
-      <Helmet><title>Sermons · Soddo Baptist Church</title></Helmet>
+      <Helmet><title>Sermons · GCBC</title></Helmet>
       <PageHeader
         title="Sermons"
         subtitle="Audio and video messages from Sunday gatherings."

@@ -12,7 +12,7 @@ const sermons = [
     series: 'Foundations',
     scripture: 'Genesis 1:1',
     date: '2026-07-19',
-    youtubeId: PLACEHOLDER_YOUTUBE_ID,
+    youtubeId: 'https://www.youtube.com/watch?v=k7SwF2B30CE&list=RDk7SwF2B30CE&start_radio=1',
     description:
       'An introduction to who God is as both the one who made all things and the one who redeems them.',
   },
@@ -23,7 +23,7 @@ const sermons = [
     series: 'Foundations',
     scripture: '1 Corinthians 1:26-31',
     date: '2026-07-12',
-    youtubeId: PLACEHOLDER_YOUTUBE_ID,
+    youtubeId: 'https://www.youtube.com/watch?v=k7SwF2B30CE&list=RDk7SwF2B30CE&start_radio=1',
     description: 'Why God so often chooses what the world overlooks.',
   },
   {
@@ -33,7 +33,7 @@ const sermons = [
     series: 'The Great Commission',
     scripture: 'Matthew 28:18-20',
     date: '2026-07-05',
-    youtubeId: PLACEHOLDER_YOUTUBE_ID,
+    youtubeId: 'https://youtu.be/k7SwF2B30CE?si=siLcfmRqrx7f_0ee',
     description: 'What it means to go, baptize, and teach in our own context.',
   },
   {
@@ -43,7 +43,7 @@ const sermons = [
     series: 'The Church at Work',
     scripture: 'Ephesians 4:12-14',
     date: '2026-06-28',
-    youtubeId: PLACEHOLDER_YOUTUBE_ID,
+    youtubeId: 'https://youtu.be/k7SwF2B30CE?si=siLcfmRqrx7f_0ee',
     description: 'Every believer has a part to play in building up the body.',
   },
 ];

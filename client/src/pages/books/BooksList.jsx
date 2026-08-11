@@ -11,7 +11,7 @@ export default function BooksList() {
 
   return (
     <div>
-      <Helmet><title>Books · Soddo Baptist Church</title></Helmet>
+      <Helmet><title>Books · GCBC</title></Helmet>
       <PageHeader
         title="Books"
         subtitle="Recommended reading from our library."

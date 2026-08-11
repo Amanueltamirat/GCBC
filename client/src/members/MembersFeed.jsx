@@ -11,7 +11,7 @@ export default function MembersFeed() {
 
   return (
     <div>
-      <Helmet><title>Members · Soddo Baptist Church</title></Helmet>
+      <Helmet><title>Members · GCBC</title></Helmet>
 
       <PageHeader
         title={`Welcome back, ${user?.name?.split(' ')[0]}`}
