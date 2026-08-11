@@ -51,7 +51,7 @@ export default function Footer() {
         </nav>
 
         {/* Visit */}
-        <div>
+        <div className='xl:-ml-20 lg:-ml-20'>
           <p className="text-sm font-semibold text-white mb-4 uppercase tracking-wide">Visit Us</p>
           <div className="flex items-start gap-2.5 text-sm mb-3">
             <Clock size={16} className="mt-0.5 shrink-0 text-accent" />
