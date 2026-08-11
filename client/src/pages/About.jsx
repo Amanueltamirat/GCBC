@@ -29,7 +29,7 @@ export default function About() {
             Wolaita Soddo, Ethiopia
           </p>
           <h1 className="text-4xl sm:text-6xl font-extrabold leading-tight">
-            Welcome to <span className="italic font-semibold">Soddo Baptist</span> Church
+            Welcome to <span className="italic font-semibold">Grace Community Baptist</span> Church
           </h1>
           <p className="mt-4 max-w-xl text-lg text-white/80">
             A reformed Baptist congregation, gathered around the Word since 2018.
@@ -67,7 +67,7 @@ export default function About() {
       {/* History */}
       <Section id="history" eyebrow="Where we came from" title="Our History" alt>
         <p className="text-ink/80 leading-relaxed max-w-2xl mb-4">
-          Soddo Baptist Church is a reformed Baptist congregation in Wolaita Soddo,
+          Grace Community Baptist Church is a reformed Baptist congregation in Wolaita Soddo,
           subscribing to the 1689 London Baptist Confession of Faith. We began gathering in
           2018 and have since grown to a congregation of nearly 70 members, many of them
           university and high school students.

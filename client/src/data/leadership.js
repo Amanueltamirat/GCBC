@@ -2,9 +2,9 @@
 // placeholders are clearly generic stock portraits, not real people.
 const leadership = [
   {
-    name: 'Amanuel Tamirat',
-    title: 'Lead Pastor',
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+    name: 'Tesatsion Alemayehu',
+    title: 'Pastor',
+    photo: '/tesfa.jpg',
   },
   {
     name: 'Yohannes Bekele',
@@ -12,9 +12,9 @@ const leadership = [
     photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
   },
   {
-    name: 'Selam Bekele',
+    name: 'Bekele Babulo',
     title: 'Deacon, Women\u2019s Ministry',
-    photo: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80',
+    photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80',
   },
 ];
 
