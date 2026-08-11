@@ -23,7 +23,7 @@ export default function About() {
             "url('https://images.unsplash.com/photo-1543429257-6ac2fda07f61?w=1600&q=80')",
         }}
       >
-        <div className="absolute inset-0 bg-linear-to-t from-ink via-ink/70 to-ink/30" />
+        <div className="absolute inset-0 bg-linear-to-t from-stone-400 via-ink/60 to-ink/20" />
         <div className="relative mx-auto max-w-content w-full px-5 sm:px-8 pb-14">
           <p className="text-amber-700 font-semibold tracking-wide uppercase text-sm mb-3">
             Wolaita Soddo, Ethiopia
