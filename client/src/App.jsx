@@ -31,6 +31,8 @@ import BookForm from './pages/books/BookForm';
 import MembersFeed from './members/MembersFeed';
 import MemberPostForm from './members/MemberPostForm';
 import ReadBook from './pages/books/ReadBook';
+import MembershipRequests from './pages/admin/MembershipRequests';
+import SignUp from './pages/SignUp';
 
 function App() {
   return (
@@ -47,6 +49,7 @@ function App() {
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/signin" element={<SignIn />} />
+                  <Route path='/signup' element={<SignUp/>}/>
 
                   <Route path="/sermons" element={<SermonsList />} />
                   <Route path="/sermons/new" element={<ProtectedRoute role="admin"><SermonForm mode="create" /></ProtectedRoute>} />
@@ -80,6 +83,11 @@ function App() {
                     </ProtectedRoute>
                   }
                   />
+                  <Route path='/admin/members' element={
+                    <ProtectedRoute role='admin'>
+                      <MembershipRequests/>
+                    </ProtectedRoute>
+                  }/>
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

@@ -1,9 +1,10 @@
-// DEMO ACCOUNTS ONLY — there is no real backend yet (see README-rebuild.md).
-// Password check is intentionally trivial; do not reuse this pattern once
-// real auth is wired up.
+// DEMO ACCOUNTS ONLY — there is no real backend yet. Passwords are stored
+// in plain text in browser state purely for this front-end demo; a real
+// implementation must hash passwords server-side and never expose them to
+// the client at all.
 const users = [
-  { email: 'admin@sbc.org', password: 'admin123', name: 'Admin', role: 'admin' },
-  { email: 'member@sbc.org', password: 'member123', name: 'Selam Bekele', role: 'member' },
+  { name: 'Admin', email: 'admin@sbc.org', password: 'admin123', role: 'admin', status: 'approved' },
+  { name: 'Selam Bekele', email: 'member@sbc.org', password: 'member123', role: 'member', status: 'approved' },
 ];
 
 export default users;

@@ -12,22 +12,21 @@ const LINKS = [
 ];
 
 function navClass({ isActive }) {
-  return `text-sm font-medium px-1 py-2 border-b-2 transition-colors ${
+  return `text-lg font-medium px-1 py-2 border-b-2 transition-colors ${
     isActive ? 'border-accent text-ink' : 'border-transparent text-muted hover:text-ink'
   }`;
 }
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { user, isMember, signOut } = useAuth();
+  const { user, isMember, isAdmin, signOut, pendingUsers } = useAuth();
+  const pendingCount = pendingUsers?.length || 0;
 
   return (
     <header className="sticky top-0 z-40 bg-paper border-b border-border">
       <div className="mx-auto max-w-content px-5 sm:px-8 h-24 flex items-center justify-between">
-        {/* <Link to="/" className="font-extrabold text-lg tracking-tight text-ink">
-        </Link> */}
         <Link to={'/'} className='h-full'>
-          <img src="/logo.jpg" alt="GCBC-logo" className='h-26 -my-2' />
+          <img src="/logo.jpg" alt="GCBC-logo" className='h-24' />
         </Link>
 
         <nav aria-label="Primary" className="hidden lg:flex items-center gap-6">
@@ -41,26 +40,43 @@ export default function Navbar() {
               Members
             </NavLink>
           )}
+          {isAdmin && (
+            <NavLink to="/admin/members" className={navClass}>
+              <span className="flex items-center gap-1.5">
+                Manage Members
+                {pendingCount > 0 && (
+                  <span className="grid h-5 min-w-5 place-items-center rounded-full bg-accent px-1 text-[11px] font-bold text-white">
+                    {pendingCount}
+                  </span>
+                )}
+              </span>
+            </NavLink>
+          )}
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
           {user ? (
             <>
-              <span className="text-sm text-muted">{user.name}</span>
+              <span className="text-lg text-muted">{user.name}</span>
               <button
                 onClick={signOut}
-                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-ink hover:bg-paper-2"
+                className="cursor-pointer rounded-md border border-border px-3 py-1.5 text-sm font-medium text-ink hover:bg-paper-2"
               >
                 Sign Out
               </button>
             </>
           ) : (
-            <Link
-              to="/signin"
-              className="rounded-md bg-accent px-4 py-1.5 text-sm font-semibold text-white hover:bg-accent-dark"
-            >
-              Sign In
-            </Link>
+            <>
+              <Link to="/signin" className="text-sm font-medium text-ink hover:text-accent">
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="rounded-md bg-accent px-4 py-1.5 text-sm font-semibold text-white hover:bg-accent-dark"
+              >
+                Sign Up
+              </Link>
+            </>
           )}
         </div>
 
@@ -91,6 +107,11 @@ export default function Navbar() {
               Members
             </NavLink>
           )}
+          {isAdmin && (
+            <NavLink to="/admin/members" onClick={() => setOpen(false)} className="rounded-md px-3 py-2.5 text-ink hover:bg-paper-2">
+              Manage Members {pendingCount > 0 && `(${pendingCount})`}
+            </NavLink>
+          )}
           <div className="h-px bg-border my-2" />
           {user ? (
             <button
@@ -103,9 +124,14 @@ export default function Navbar() {
               Sign Out
             </button>
           ) : (
-            <NavLink to="/signin" onClick={() => setOpen(false)} className="rounded-md bg-accent px-3 py-2.5 text-center font-semibold text-white">
-              Sign In
-            </NavLink>
+            <>
+              <NavLink to="/signin" onClick={() => setOpen(false)} className="rounded-md px-3 py-2.5 text-ink hover:bg-paper-2">
+                Sign In
+              </NavLink>
+              <NavLink to="/signup" onClick={() => setOpen(false)} className="rounded-md bg-accent px-3 py-2.5 text-center font-semibold text-white">
+                Sign Up
+              </NavLink>
+            </>
           )}
         </nav>
       )}
