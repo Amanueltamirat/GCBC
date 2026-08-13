@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Check, X, UserMinus, Clock, Users, Archive } from 'lucide-react';
+import { Check, X, UserMinus, Clock, Users, Archive, Mail } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
@@ -23,13 +23,43 @@ function Avatar({ name }) {
   );
 }
 
+// Small inline status line shown under a row while/after its email sends.
+function EmailStatus({ status }) {
+  if (!status) return null;
+  if (status === 'sending') {
+    return <p className="text-xs text-muted mt-2 flex items-center gap-1"><Mail size={12} /> Sending confirmation email…</p>;
+  }
+  if (status === 'sent') {
+    return <p className="text-xs text-ink/60 mt-2 flex items-center gap-1"><Mail size={12} /> Confirmation email sent.</p>;
+  }
+  return <p className="text-xs text-accent-dark mt-2 flex items-center gap-1"><Mail size={12} /> Decision saved, but the email failed to send.</p>;
+}
+
 export default function MembershipRequests() {
   const { users, pendingUsers, activeMembers, approveUser, rejectUser, removeUser } = useAuth();
   const [removeTarget, setRemoveTarget] = useState(null);
+  // email -> 'sending' | 'sent' | 'failed', auto-clears a few seconds after landing
+  const [emailStatus, setEmailStatus] = useState({});
 
   const history = users.filter(
     (u) => u.role !== 'admin' && (u.status === 'rejected' || u.status === 'removed')
   );
+
+  const runWithEmailStatus = async (email, action) => {
+    setEmailStatus((s) => ({ ...s, [email]: 'sending' }));
+    const result = await action(email);
+    setEmailStatus((s) => ({ ...s, [email]: result.emailSent ? 'sent' : 'failed' }));
+    setTimeout(() => {
+      setEmailStatus((s) => {
+        const next = { ...s };
+        delete next[email];
+        return next;
+      });
+    }, 4000);
+  };
+
+  const handleApprove = (email) => runWithEmailStatus(email, approveUser);
+  const handleReject = (email) => runWithEmailStatus(email, rejectUser);
 
   const handleConfirmRemove = () => {
     removeUser(removeTarget.email);
@@ -40,10 +70,6 @@ export default function MembershipRequests() {
     <div>
       <Helmet><title>Manage Members · Soddo Baptist Church</title></Helmet>
 
-      {/* Header — dark ink band, no photo. This is an internal admin
-          screen, not something visitors browse, so it earns its
-          "attractive" through the same accent/ink language and better
-          card design rather than a marketing-style hero photo. */}
       <section className="bg-ink text-white">
         <div className="mx-auto max-w-content px-5 sm:px-8 pt-16 pb-14">
           <p className="text-accent font-semibold tracking-wide uppercase text-sm mb-3">Admin</p>
@@ -66,34 +92,42 @@ export default function MembershipRequests() {
           <p className="text-muted mb-14">No pending requests right now.</p>
         ) : (
           <div className="flex flex-col gap-3 mb-14">
-            {pendingUsers.map((u) => (
-              <div
-                key={u.email}
-                className="flex items-center justify-between gap-4 rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-shadow flex-wrap"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar name={u.name} />
-                  <div>
-                    <p className="font-semibold text-ink">{u.name}</p>
-                    <p className="text-sm text-muted">{u.email}</p>
+            {pendingUsers.map((u) => {
+              const sending = emailStatus[u.email] === 'sending';
+              return (
+                <div
+                  key={u.email}
+                  className="rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-3">
+                      <Avatar name={u.name} />
+                      <div>
+                        <p className="font-semibold text-ink">{u.name}</p>
+                        <p className="text-sm text-muted">{u.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleApprove(u.email)}
+                        disabled={sending}
+                        className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90 disabled:opacity-60"
+                      >
+                        <Check size={15} /> Approve
+                      </button>
+                      <button
+                        onClick={() => handleReject(u.email)}
+                        disabled={sending}
+                        className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5 disabled:opacity-60"
+                      >
+                        <X size={15} /> Reject
+                      </button>
+                    </div>
                   </div>
+                  <EmailStatus status={emailStatus[u.email]} />
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => approveUser(u.email)}
-                    className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90"
-                  >
-                    <Check size={15} /> Approve
-                  </button>
-                  <button
-                    onClick={() => rejectUser(u.email)}
-                    className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5"
-                  >
-                    <X size={15} /> Reject
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 

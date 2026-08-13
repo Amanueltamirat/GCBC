@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import seedUsers from '../data/users';
+import { sendMembershipDecisionEmail } from '../utils/membershipEmail';
 
 const AuthContext = createContext();
 const USERS_KEY = 'sbc_users';
@@ -25,9 +26,6 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem(SESSION_KEY);
   }, [user]);
 
-  // Keep multiple open tabs in sync — an admin approving/removing someone
-  // in one tab should be reflected if that person is sitting on the sign-in
-  // page in another tab. Mock-only nicety; a real backend makes this moot.
   useEffect(() => {
     const onStorage = (e) => {
       if (e.key === USERS_KEY && e.newValue) setUsers(JSON.parse(e.newValue));
@@ -40,7 +38,6 @@ export function AuthProvider({ children }) {
     const match = users.find((u) => u.email === email && u.password === password);
 
     if (!match) return { ok: false, message: 'Invalid email or password.' };
-
     if (match.status === 'pending') {
       return { ok: false, message: 'Your registration is still pending admin approval.' };
     }
@@ -60,8 +57,6 @@ export function AuthProvider({ children }) {
 
   const signUp = ({ name, email, password }) => {
     const existing = users.find((u) => u.email === email);
-    // A previously rejected or removed person is welcome to try again —
-    // only a currently pending or active account blocks a new signup.
     const blocked = existing && (existing.status === 'pending' || existing.status === 'approved');
 
     if (blocked) {
@@ -80,16 +75,36 @@ export function AuthProvider({ children }) {
   };
 
   // --- Admin actions ---
-  const approveUser = (email) =>
+  // Both of these are now async: the status change happens first and is
+  // the source of truth (never rolled back), then a best-effort email goes
+  // out. The returned object tells the caller whether the email actually
+  // sent, so the UI can be honest about it instead of assuming success.
+  const approveUser = async (email) => {
+    const target = users.find((u) => u.email === email);
     setUsers((prev) => prev.map((u) => (u.email === email ? { ...u, status: 'approved' } : u)));
 
-  const rejectUser = (email) =>
+    if (!target) return { ok: true, emailSent: false };
+    try {
+      await sendMembershipDecisionEmail({ toEmail: target.email, toName: target.name, decision: 'approved' });
+      return { ok: true, emailSent: true };
+    } catch (err) {
+      return { ok: true, emailSent: false, emailError: err.message };
+    }
+  };
+
+  const rejectUser = async (email) => {
+    const target = users.find((u) => u.email === email);
     setUsers((prev) => prev.map((u) => (u.email === email ? { ...u, status: 'rejected' } : u)));
 
-  // Soft-remove, not a hard delete — keeps a record that this person was
-  // once a member, which an admin may want later ("when did they leave?").
-  // Deliberately can't be used on an admin account (see MembershipRequests.jsx,
-  // which never renders a Remove button next to role === 'admin').
+    if (!target) return { ok: true, emailSent: false };
+    try {
+      await sendMembershipDecisionEmail({ toEmail: target.email, toName: target.name, decision: 'rejected' });
+      return { ok: true, emailSent: true };
+    } catch (err) {
+      return { ok: true, emailSent: false, emailError: err.message };
+    }
+  };
+
   const removeUser = (email) =>
     setUsers((prev) =>
       prev.map((u) => (u.email === email && u.role !== 'admin' ? { ...u, status: 'removed' } : u))
@@ -98,7 +113,7 @@ export function AuthProvider({ children }) {
   const pendingUsers = users.filter((u) => u.status === 'pending');
   const activeMembers = users.filter((u) => u.status === 'approved' && u.role === 'member');
 
-  const role = user?.role || 'guest'; // 'guest' | 'member' | 'admin'
+  const role = user?.role || 'guest';
   const isMember = role === 'member' || role === 'admin';
   const isAdmin = role === 'admin';
 
