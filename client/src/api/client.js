@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL:import.meta.NETLIFY_URL || 'https://gcbc-server.netlify.app/api',
+    baseURL:import.meta.RENDER_URL || 'https://gcbc-server.onrender.com/api',
     withCredentials: true
 });
 
