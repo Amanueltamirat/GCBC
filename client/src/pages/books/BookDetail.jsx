@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Pencil, Trash2, BookOpenText, Download } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
+import { getErrorMessage } from '../../api/client';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
 export default function BookDetail() {
@@ -12,6 +13,7 @@ export default function BookDetail() {
   const { getById, remove } = useContent();
   const { isAdmin } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   const book = getById('books', id);
 
@@ -24,10 +26,15 @@ export default function BookDetail() {
     );
   }
 
-  const handleDelete = () => {
-    remove('books', book.id);
-    setShowModal(false);
-    navigate('/books');
+  const handleDelete = async () => {
+    try {
+      await remove('books', book.id);
+      setShowModal(false);
+      navigate('/books');
+    } catch (err) {
+      setShowModal(false);
+      setDeleteError(getErrorMessage(err));
+    }
   };
 
   return (
@@ -43,58 +50,38 @@ export default function BookDetail() {
 
           <div className="flex flex-wrap gap-3">
             {book.readUrl ? (
-              <Link
-                to={`/books/${book.id}/read`}
-                className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-dark"
-              >
+              <Link to={`/books/${book.id}/read`} className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 font-semibold text-white hover:bg-accent-dark">
                 <BookOpenText size={18} /> Read Online
               </Link>
             ) : (
-              <span
-                title="Not available online yet"
-                className="inline-flex items-center gap-2 rounded-md bg-border px-5 py-2.5 font-semibold text-muted cursor-not-allowed"
-              >
+              <span title="Not available online yet" className="inline-flex items-center gap-2 rounded-md bg-border px-5 py-2.5 font-semibold text-muted cursor-not-allowed">
                 <BookOpenText size={18} /> Read Online
               </span>
             )}
 
             {book.downloadUrl ? (
-              <a
-                href={book.downloadUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 font-semibold text-ink hover:bg-paper-2"
-              >
+              <a href={book.downloadUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 font-semibold text-ink hover:bg-paper-2">
                 <Download size={18} /> Download
               </a>
             ) : (
-              <span
-                title="Not available for download yet"
-                className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 font-semibold text-muted cursor-not-allowed"
-              >
+              <span title="Not available for download yet" className="inline-flex items-center gap-2 rounded-md border border-border px-5 py-2.5 font-semibold text-muted cursor-not-allowed">
                 <Download size={18} /> Download
               </span>
             )}
           </div>
 
-          {!book.readUrl && !book.downloadUrl && (
-            <p className="text-sm text-muted mt-3">
-              This title isn't available to read or download online yet.
+          {deleteError && (
+            <p role="alert" className="mt-4 rounded-md bg-accent/10 text-accent-dark text-sm px-4 py-2.5">
+              {deleteError}
             </p>
           )}
 
           {isAdmin && (
             <div className="mt-10 flex gap-3 pt-8 border-t border-border">
-              <button
-                onClick={() => navigate(`/books/${book.id}/edit`)}
-                className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90"
-              >
+              <button onClick={() => navigate(`/books/${book.id}/edit`)} className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90">
                 <Pencil size={15} /> Edit
               </button>
-              <button
-                onClick={() => setShowModal(true)}
-                className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5"
-              >
+              <button onClick={() => setShowModal(true)} className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5">
                 <Trash2 size={15} /> Delete
               </button>
             </div>

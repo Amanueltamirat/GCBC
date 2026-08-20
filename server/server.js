@@ -1,0 +1,44 @@
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import { connectDB } from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import sermonRoutes from './routes/sermonRoutes.js'
+import articleRoutes from './routes/articleRoutes.js';
+import bookRoutes from './routes/bookRoutes.js'
+import uploadRoute from './routes/uploadRoutes.js'
+import memberPostRoutes from './routes/memberPostRoutes.js'
+import { notFound, errorHandler } from './middleware/errorHandler.js';
+
+dotenv.config();
+
+const app = express();
+
+app.use(cors({ origin: process.env.CLIENT_URL }));
+app.use(express.json());
+
+app.get('/api/health', (req, res) => res.send({ status: 'ok' }));
+
+app.use('/api/auth', authRoutes);
+app.use('/api/admin/users', userRoutes);
+app.use('/api/sermons', sermonRoutes)
+app.use('/api/articles', articleRoutes);
+app.use('/api/books', bookRoutes);
+app.use('/api/uploads', uploadRoute);
+app.use('/api/member-posts', memberPostRoutes)
+// Sermons/Articles/Books/MemberPosts routes land here in the next phase.
+
+app.use(notFound);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 4000;
+
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB:', err.message);
+    process.exit(1);
+  });

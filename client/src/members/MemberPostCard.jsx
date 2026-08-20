@@ -21,14 +21,19 @@ export default function MemberPostCard({ post }) {
   const { toggleLike, addComment, deleteComment, remove } = useContent();
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
-  const liked = user ? post.likes.includes(user.email) : false;
-  const topLevelComments = post.comments.filter((c) => !c.parentId);
-  const repliesFor = (commentId) => post.comments.filter((c) => c.parentId === commentId);
+  const liked = user ? post?.likes?.includes(user.email) : false;
+  const topLevelComments = post?.comments?.filter((c) => !c.parentId);
+  const repliesFor = (commentId) => post?.comments?.filter((c) => c.parentId === commentId);
 
-  const handleDeletePost = () => {
-    remove('memberPosts', post.id);
-    setShowDelete(false);
+  const handleDeletePost = async () => {
+    try {
+      await remove('memberPosts', post.id);
+      setShowDelete(false);
+    } catch (err) {
+      setDeleteError('Could not delete this post. Please try again.');
+    }
   };
 
   return (
@@ -39,18 +44,10 @@ export default function MemberPostCard({ post }) {
         </span>
         {isAdmin && (
           <div className="flex gap-2">
-            <button
-              onClick={() => navigate(`/members/${post.id}/edit`)}
-              aria-label="Edit post"
-              className="text-muted hover:text-ink"
-            >
+            <button onClick={() => navigate(`/members/${post.id}/edit`)} aria-label="Edit post" className="text-muted hover:text-ink">
               <Pencil size={15} />
             </button>
-            <button
-              onClick={() => setShowDelete(true)}
-              aria-label="Delete post"
-              className="text-muted hover:text-accent"
-            >
+            <button onClick={() => setShowDelete(true)} aria-label="Delete post" className="text-muted hover:text-accent">
               <Trash2 size={15} />
             </button>
           </div>
@@ -60,22 +57,22 @@ export default function MemberPostCard({ post }) {
       <h2 className="text-lg font-bold text-ink mt-3">{post.title}</h2>
       <p className="text-xs text-muted mt-1 mb-3">{post.date}</p>
       <p className="text-ink/80 leading-relaxed">{post.body}</p>
+      {deleteError && <p className="text-sm text-accent-dark mt-2">{deleteError}</p>}
 
-      {/* Engagement bar */}
       <div className="mt-4 flex items-center gap-2 border-t border-border pt-3">
         <LikeButton
           liked={liked}
-          count={post.likes.length}
+          count={post?.likes?.length}
           disabled={!user}
-          onToggle={() => user && toggleLike(post.id, user.email)}
+          onToggle={() => user && toggleLike(post.id)}
         />
         <button
           onClick={() => setCommentsOpen((v) => !v)}
           className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-muted hover:text-ink"
         >
           <MessageCircle size={17} />
-          {post.comments.length > 0 ? post.comments.length : ''}{' '}
-          {post.comments.length === 1 ? 'Comment' : 'Comments'}
+          {post?.comments?.length > 0 ? post.comments.length : ''}{' '}
+          {post?.comments?.length === 1 ? 'Comment' : 'Comments'}
         </button>
       </div>
 
@@ -91,18 +88,13 @@ export default function MemberPostCard({ post }) {
               replies={repliesFor(comment.id)}
               currentUser={user}
               isAdmin={isAdmin}
-              onReply={(parentId, body) =>
-                addComment(post.id, { author: user.name, authorRole: user.role, body, parentId })
-              }
+              onReply={(parentId, body) => addComment(post.id, { body, parentId })}
               onDelete={(commentId) => deleteComment(post.id, commentId)}
             />
           ))}
 
           {user ? (
-            <CommentForm
-              placeholder="Write a comment…"
-              onSubmit={(body) => addComment(post.id, { author: user.name, authorRole: user.role, body })}
-            />
+            <CommentForm placeholder="Write a comment…" onSubmit={(body) => addComment(post.id, { body })} />
           ) : (
             <p className="text-sm text-muted">Sign in to join the conversation.</p>
           )}

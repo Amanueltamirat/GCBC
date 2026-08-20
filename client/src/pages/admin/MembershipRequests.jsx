@@ -23,7 +23,6 @@ function Avatar({ name }) {
   );
 }
 
-// Small inline status line shown under a row while/after its email sends.
 function EmailStatus({ status }) {
   if (!status) return null;
   if (status === 'sending') {
@@ -38,31 +37,32 @@ function EmailStatus({ status }) {
 export default function MembershipRequests() {
   const { users, pendingUsers, activeMembers, approveUser, rejectUser, removeUser } = useAuth();
   const [removeTarget, setRemoveTarget] = useState(null);
-  // email -> 'sending' | 'sent' | 'failed', auto-clears a few seconds after landing
+  // Keyed by _id now, not email — email was only ever a convenient unique
+  // string in the mock version; _id is the real identifier the API uses.
   const [emailStatus, setEmailStatus] = useState({});
 
   const history = users.filter(
     (u) => u.role !== 'admin' && (u.status === 'rejected' || u.status === 'removed')
   );
 
-  const runWithEmailStatus = async (email, action) => {
-    setEmailStatus((s) => ({ ...s, [email]: 'sending' }));
-    const result = await action(email);
-    setEmailStatus((s) => ({ ...s, [email]: result.emailSent ? 'sent' : 'failed' }));
+  const runWithEmailStatus = async (id, action) => {
+    setEmailStatus((s) => ({ ...s, [id]: 'sending' }));
+    const result = await action(id);
+    setEmailStatus((s) => ({ ...s, [id]: result.emailSent ? 'sent' : 'failed' }));
     setTimeout(() => {
       setEmailStatus((s) => {
         const next = { ...s };
-        delete next[email];
+        delete next[id];
         return next;
       });
     }, 4000);
   };
 
-  const handleApprove = (email) => runWithEmailStatus(email, approveUser);
-  const handleReject = (email) => runWithEmailStatus(email, rejectUser);
+  const handleApprove = (id) => runWithEmailStatus(id, approveUser);
+  const handleReject = (id) => runWithEmailStatus(id, rejectUser);
 
-  const handleConfirmRemove = () => {
-    removeUser(removeTarget.email);
+  const handleConfirmRemove = async () => {
+    await removeUser(removeTarget._id);
     setRemoveTarget(null);
   };
 
@@ -86,19 +86,15 @@ export default function MembershipRequests() {
       </section>
 
       <div className="mx-auto max-w-content px-5 sm:px-8 py-16">
-        {/* Pending requests */}
         <SectionTitle eyebrow="Needs a decision" title="Awaiting Approval" />
         {pendingUsers.length === 0 ? (
           <p className="text-muted mb-14">No pending requests right now.</p>
         ) : (
           <div className="flex flex-col gap-3 mb-14">
             {pendingUsers.map((u) => {
-              const sending = emailStatus[u.email] === 'sending';
+              const sending = emailStatus[u._id] === 'sending';
               return (
-                <div
-                  key={u.email}
-                  className="rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-shadow"
-                >
+                <div key={u._id} className="rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-3">
                       <Avatar name={u.name} />
@@ -108,40 +104,28 @@ export default function MembershipRequests() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <button
-                        onClick={() => handleApprove(u.email)}
-                        disabled={sending}
-                        className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90 disabled:opacity-60"
-                      >
+                      <button onClick={() => handleApprove(u._id)} disabled={sending} className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90 disabled:opacity-60">
                         <Check size={15} /> Approve
                       </button>
-                      <button
-                        onClick={() => handleReject(u.email)}
-                        disabled={sending}
-                        className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5 disabled:opacity-60"
-                      >
+                      <button onClick={() => handleReject(u._id)} disabled={sending} className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5 disabled:opacity-60">
                         <X size={15} /> Reject
                       </button>
                     </div>
                   </div>
-                  <EmailStatus status={emailStatus[u.email]} />
+                  <EmailStatus status={emailStatus[u._id]} />
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* Active members */}
         <SectionTitle eyebrow="Current congregation" title="Active Members" />
         {activeMembers.length === 0 ? (
           <p className="text-muted mb-14">No active members yet.</p>
         ) : (
           <div className="flex flex-col gap-3 mb-14">
             {activeMembers.map((u) => (
-              <div
-                key={u.email}
-                className="flex items-center justify-between gap-4 rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-shadow flex-wrap"
-              >
+              <div key={u._id} className="flex items-center justify-between gap-4 rounded-lg border border-border p-4 shadow-sm hover:shadow-md transition-shadow flex-wrap">
                 <div className="flex items-center gap-3">
                   <Avatar name={u.name} />
                   <div>
@@ -149,10 +133,7 @@ export default function MembershipRequests() {
                     <p className="text-sm text-muted">{u.email}</p>
                   </div>
                 </div>
-                <button
-                  onClick={() => setRemoveTarget(u)}
-                  className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5"
-                >
+                <button onClick={() => setRemoveTarget(u)} className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5">
                   <UserMinus size={15} /> Remove
                 </button>
               </div>
@@ -160,16 +141,12 @@ export default function MembershipRequests() {
           </div>
         )}
 
-        {/* History */}
         {history.length > 0 && (
           <>
             <SectionTitle eyebrow="Past decisions" title="History" />
             <div className="flex flex-col gap-2">
               {history.map((u) => (
-                <div
-                  key={u.email}
-                  className="flex items-center justify-between gap-4 rounded-lg border border-border px-4 py-3"
-                >
+                <div key={u._id} className="flex items-center justify-between gap-4 rounded-lg border border-border px-4 py-3">
                   <div className="flex items-center gap-3">
                     <Avatar name={u.name} />
                     <div>

@@ -9,9 +9,12 @@ import HeroSlider from '../components/HeroSlider';
 // Swap these for real photos of the church/congregation whenever you have
 // them — HeroSlider just needs an array of image URLs.
 const HERO_IMAGES = [
-  'https://images.unsplash.com/photo-1438032005730-c779502df39b?w=1600&q=80',
-  'https://images.unsplash.com/photo-1523803326055-13445f07b17a?w=1600&q=80',
-  'https://images.unsplash.com/photo-1478147427282-58a87a120781?w=1600&q=80',
+  '/img1.jpg',
+  '/img2.jpg',
+  '/img3.jpg',
+  '/img4.JPG',
+  '/img5.jpg',
+  '/img6.jpg',
 ];
 const HERO_ALT_TEXTS = [
   'Congregation gathered inside the sanctuary',

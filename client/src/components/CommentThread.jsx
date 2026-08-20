@@ -4,7 +4,10 @@ import CommentForm from './CommentForm';
 
 export default function CommentThread({ comment, replies, currentUser, isAdmin, onReply, onDelete }) {
   const [replyOpen, setReplyOpen] = useState(false);
-  const canDelete = isAdmin || comment.author === currentUser?.name;
+  // Was `comment.author === currentUser?.name` — fixed to compare the real
+  // identity (email) instead of a display name two people could share.
+  // See backend Phase 3's README for the full reasoning.
+  const canDelete = isAdmin || comment.authorEmail === currentUser?.email;
 
   return (
     <div className="flex flex-col gap-3">
@@ -39,7 +42,7 @@ export default function CommentThread({ comment, replies, currentUser, isAdmin, 
             <CommentRow
               key={reply.id}
               comment={reply}
-              canDelete={isAdmin || reply.author === currentUser?.name}
+              canDelete={isAdmin || reply.authorEmail === currentUser?.email}
               onDelete={() => onDelete(reply.id)}
             />
           ))}

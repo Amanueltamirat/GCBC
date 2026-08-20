@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useContent } from '../../context/ContentContext';
+import { getErrorMessage } from '../../api/client';
 
 const EMPTY = { title: '', author: '', image: '', excerpt: '', content: '' };
 
@@ -12,6 +13,8 @@ export default function ArticleForm({ mode }) {
   const { getById, create, update } = useContent();
 
   const [fields, setFields] = useState(EMPTY);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (isUpdate) {
@@ -23,14 +26,21 @@ export default function ArticleForm({ mode }) {
 
   const setField = (key) => (e) => setFields((f) => ({ ...f, [key]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isUpdate) {
-      update('articles', id, fields);
-      navigate(`/articles/${id}`);
-    } else {
-      const created = create('articles', fields);
-      navigate(`/articles/${created.id}`);
+    setSaving(true);
+    setError(null);
+    try {
+      if (isUpdate) {
+        const updated = await update('articles', id, fields);
+        navigate(`/articles/${updated.id}`);
+      } else {
+        const created = await create('articles', fields);
+        navigate(`/articles/${created.id}`);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+      setSaving(false);
     }
   };
 
@@ -42,6 +52,8 @@ export default function ArticleForm({ mode }) {
       </h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {error && <p role="alert" className="rounded-md bg-accent/10 text-accent-dark text-sm px-4 py-2.5">{error}</p>}
+
         <Field label="Title" value={fields.title} onChange={setField('title')} required />
         <Field label="Author" value={fields.author} onChange={setField('author')} required />
         <Field label="Cover image URL" value={fields.image} onChange={setField('image')} hint="Paste a link to an image." />
@@ -53,8 +65,8 @@ export default function ArticleForm({ mode }) {
           <label htmlFor="content" className="block text-sm font-medium text-ink mb-1">Content</label>
           <textarea id="content" rows={8} value={fields.content} onChange={setField('content')} required className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent" />
         </div>
-        <button type="submit" className="self-start mt-2 rounded-md bg-accent px-6 py-2.5 font-semibold text-white hover:bg-accent-dark">
-          {isUpdate ? 'Update Article' : 'Publish Article'}
+        <button type="submit" disabled={saving} className="self-start mt-2 rounded-md bg-accent px-6 py-2.5 font-semibold text-white hover:bg-accent-dark disabled:opacity-60">
+          {saving ? 'Saving…' : isUpdate ? 'Update Article' : 'Publish Article'}
         </button>
       </form>
     </div>

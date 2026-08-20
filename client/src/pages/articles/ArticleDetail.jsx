@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useContent } from '../../context/ContentContext';
 import { useAuth } from '../../context/AuthContext';
+import { getErrorMessage } from '../../api/client';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
 export default function ArticleDetail() {
@@ -12,6 +13,7 @@ export default function ArticleDetail() {
   const { getById, remove } = useContent();
   const { isAdmin } = useAuth();
   const [showModal, setShowModal] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   const article = getById('articles', id);
 
@@ -24,10 +26,15 @@ export default function ArticleDetail() {
     );
   }
 
-  const handleDelete = () => {
-    remove('articles', article.id);
-    setShowModal(false);
-    navigate('/articles');
+  const handleDelete = async () => {
+    try {
+      await remove('articles', article.id);
+      setShowModal(false);
+      navigate('/articles');
+    } catch (err) {
+      setShowModal(false);
+      setDeleteError(getErrorMessage(err));
+    }
   };
 
   return (
@@ -36,22 +43,22 @@ export default function ArticleDetail() {
 
       <p className="text-sm text-muted">{article.date}</p>
       <h1 className="text-3xl sm:text-4xl font-extrabold text-ink mt-1 mb-6">{article.title}</h1>
-      <img src={article.image} alt="" className="w-full rounded-lg mb-8" />
+      {article.image && <img src={article.image} alt="" className="w-full rounded-lg mb-8" />}
       <p className="text-sm font-semibold text-ink mb-6">By {article.author}</p>
       <p className="text-ink/80 leading-relaxed">{article.content}</p>
 
+      {deleteError && (
+        <p role="alert" className="mt-6 rounded-md bg-accent/10 text-accent-dark text-sm px-4 py-2.5">
+          {deleteError}
+        </p>
+      )}
+
       {isAdmin && (
         <div className="mt-10 flex gap-3 pt-8 border-t border-border">
-          <button
-            onClick={() => navigate(`/articles/${article.id}/edit`)}
-            className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90"
-          >
+          <button onClick={() => navigate(`/articles/${article.id}/edit`)} className="flex items-center gap-1.5 rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink/90">
             <Pencil size={15} /> Edit
           </button>
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5"
-          >
+          <button onClick={() => setShowModal(true)} className="flex items-center gap-1.5 rounded-md border border-accent/40 px-4 py-2 text-sm font-semibold text-accent hover:bg-accent/5">
             <Trash2 size={15} /> Delete
           </button>
         </div>

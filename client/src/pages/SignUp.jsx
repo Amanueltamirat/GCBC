@@ -1,32 +1,32 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function SignUp() {
   const { signUp } = useAuth();
-  const navigate = useNavigate();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
-    const result = signUp({ name, email, password });
-    if (result.ok) {
-      setSubmitted(true);
-    } else {
-      setError(result.message);
-    }
+    setSubmitting(true);
+    setError(null);
+    const result = await signUp({ name, email, password });
+    setSubmitting(false);
+    if (result.ok) setSubmitted(true);
+    else setError(result.message);
   };
 
   if (submitted) {
@@ -61,50 +61,22 @@ export default function SignUp() {
         )}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-ink mb-1">Full name</label>
-          <input
-            id="name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent"
-          />
+          <input id="name" required value={name} onChange={(e) => setName(e.target.value)} className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent" />
         </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-ink mb-1">Email</label>
-          <input
-            id="email"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent"
-          />
+          <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent" />
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium text-ink mb-1">Password</label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={6}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent"
-          />
+          <input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent" />
         </div>
         <div>
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-ink mb-1">Confirm password</label>
-          <input
-            id="confirmPassword"
-            type="password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent"
-          />
+          <input id="confirmPassword" type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full rounded-md border border-border px-4 py-2.5 outline-none focus:border-accent" />
         </div>
-        <button type="submit" className="rounded-md bg-accent px-6 py-2.5 font-semibold text-white hover:bg-accent-dark">
-          Request an Account
+        <button type="submit" disabled={submitting} className="rounded-md bg-accent px-6 py-2.5 font-semibold text-white hover:bg-accent-dark disabled:opacity-60">
+          {submitting ? 'Submitting…' : 'Request an Account'}
         </button>
       </form>
 

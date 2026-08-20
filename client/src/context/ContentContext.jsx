@@ -1,117 +1,110 @@
-import React, { createContext, useContext, useReducer } from 'react';
-import initialSermons from '../data/sermons';
-import initialArticles from '../data/articles';
-import initialBooks from '../data/books';
-import initialMemberPosts from '../data/memberPosts';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import api from '../api/client';
+import { useAuth } from './AuthContext';
 
 const ContentContext = createContext();
 
-const initialState = {
-  sermons: initialSermons,
-  articles: initialArticles,
-  books: initialBooks,
-  memberPosts: initialMemberPosts,
+
+
+const normalizeComment = (c) => ({ ...c, id: c._id, date: c.createdAt?.slice(0, 10) });
+const normalizeItem = (doc) => ({
+  ...doc,
+  id: doc._id,
+  date: doc.createdAt?.slice(0, 10),
+  ...(doc.comments ? { comments: doc.comments.map(normalizeComment) } : {}),
+});
+
+const ENDPOINTS = {
+  sermons: '/sermons',
+  articles: '/articles',
+  books: '/books',
+  memberPosts: '/member-posts',
 };
 
-function reducer(state, action) {
-  const { collection } = action;
-  switch (action.type) {
-    case 'CREATE':
-      return { ...state, [collection]: [action.item, ...state[collection]] };
-    case 'UPDATE':
-      return {
-        ...state,
-        [collection]: state[collection].map((item) =>
-          item.id === action.id ? { ...item, ...action.updates } : item
-        ),
-      };
-    case 'DELETE':
-      return {
-        ...state,
-        [collection]: state[collection].filter((item) => item.id !== action.id),
-      };
-
-    // --- Member post engagement (only memberPosts uses these) ---
-    case 'TOGGLE_LIKE':
-      return {
-        ...state,
-        memberPosts: state.memberPosts.map((post) => {
-          if (post.id !== action.postId) return post;
-          const alreadyLiked = post.likes.includes(action.userEmail);
-          return {
-            ...post,
-            likes: alreadyLiked
-              ? post.likes.filter((email) => email !== action.userEmail)
-              : [...post.likes, action.userEmail],
-          };
-        }),
-      };
-    case 'ADD_COMMENT':
-      return {
-        ...state,
-        memberPosts: state.memberPosts.map((post) =>
-          post.id === action.postId
-            ? { ...post, comments: [...post.comments, action.comment] }
-            : post
-        ),
-      };
-    case 'DELETE_COMMENT':
-      return {
-        ...state,
-        memberPosts: state.memberPosts.map((post) =>
-          post.id === action.postId
-            ? {
-                ...post,
-                // Deleting a comment also removes its direct replies —
-                // this app only supports one level of nesting, so that's
-                // the full subtree.
-                comments: post.comments.filter(
-                  (c) => c.id !== action.commentId && c.parentId !== action.commentId
-                ),
-              }
-            : post
-        ),
-      };
-
-    default:
-      return state;
-  }
-}
-
-const genId = () => Math.random().toString(36).slice(2, 10);
-
 export function ContentProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const { isMember, user } = useAuth();
 
-  // Generic CRUD, parameterized by collection name
-  // ('sermons' | 'articles' | 'books' | 'memberPosts').
-  const create = (collection, item) => {
-    const withId = { ...item, id: genId(), date: item.date || new Date().toISOString().slice(0, 10) };
-    if (collection === 'memberPosts') {
-      withId.likes = withId.likes || [];
-      withId.comments = withId.comments || [];
+
+  const [sermons, setSermons] = useState([]);
+  const [articles, setArticles] = useState([]);
+  const [books, setBooks] = useState([]);
+  const [memberPosts, setMemberPosts] = useState([]);
+
+  const collections = { sermons, articles, books, memberPosts };
+  const setters = { sermons: setSermons, articles: setArticles, books: setBooks, memberPosts: setMemberPosts };
+
+
+  const refresh = useCallback(async (collection) => {
+    try {
+      const { data } = await api.get(ENDPOINTS[collection]);
+      setters[collection](data.map(normalizeItem));
+      // console.log(data)
+    } catch (err) {
+      // Known gap: no dedicated loading/error UI on the list pages yet
+      // (see README) — at minimum, don't leave an unhandled rejection.
+      console.error(`Failed to load ${collection}:`, err);
     }
-    dispatch({ type: 'CREATE', collection, item: withId });
-    return withId;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => { refresh('sermons'); }, [refresh]);
+  useEffect(() => { refresh('articles'); }, [refresh]);
+  useEffect(() => { refresh('books'); }, [refresh]);
+  useEffect(() => {
+    // MemberPosts is the one collection that isn't public — only fetch it
+    // once we actually know the signed-in user is an approved member.
+    if (isMember) refresh('memberPosts');
+    else setMemberPosts([]);
+  }, [isMember, refresh]);
+
+
+  const create = async (collection, item) => {
+    try {
+      const { data } = await api.post(ENDPOINTS[collection], item);
+    const normalized = normalizeItem(data);
+    setters[collection]((prev) => [normalized, ...prev]);
+    console.log(data)
+    return normalized;
+    } catch (error) {
+      console.log(error.message)
+    }
   };
-  const update = (collection, id, updates) => dispatch({ type: 'UPDATE', collection, id, updates });
-  const remove = (collection, id) => dispatch({ type: 'DELETE', collection, id });
-  const getAll = (collection) => state[collection];
-  const getById = (collection, id) => state[collection].find((item) => item.id === id);
+  
 
-  // Engagement — any signed-in member, not just admins.
-  const toggleLike = (postId, userEmail) => dispatch({ type: 'TOGGLE_LIKE', postId, userEmail });
-
-  const addComment = (postId, { author, authorRole, body, parentId = null }) => {
-    const comment = { id: genId(), parentId, author, authorRole, body, date: new Date().toISOString().slice(0, 10) };
-    dispatch({ type: 'ADD_COMMENT', postId, comment });
+  const update = async (collection, id, updates) => {
+    const { data } = await api.put(`${ENDPOINTS[collection]}/${id}`, updates);
+    const normalized = normalizeItem(data);
+    setters[collection]((prev) => prev.map((item) => (item.id === id ? normalized : item)));
+    return normalized;
   };
 
-  const deleteComment = (postId, commentId) => dispatch({ type: 'DELETE_COMMENT', postId, commentId });
+  const remove = async (collection, id) => {
+    await api.delete(`${ENDPOINTS[collection]}/${id}`);
+    setters[collection]((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const getAll = (collection) => collections[collection];
+  const getById = (collection, id) => collections[collection].find((item) => item.id === id);
+
+
+  const toggleLike = async (postId) => {
+    const { data } = await api.post(`/member-posts/${postId}/like`);
+    setMemberPosts((prev) => prev.map((p) => (p.id === postId ? normalizeItem(data) : p)));
+  };
+
+  const addComment = async (postId, { body, parentId = null }) => {
+    const { data } = await api.post(`/member-posts/${postId}/comments`, { body, parentId });
+    setMemberPosts((prev) => prev.map((p) => (p.id === postId ? normalizeItem(data) : p)));
+  };
+
+  const deleteComment = async (postId, commentId) => {
+    const { data } = await api.delete(`/member-posts/${postId}/comments/${commentId}`);
+    setMemberPosts((prev) => prev.map((p) => (p.id === postId ? normalizeItem(data) : p)));
+  };
 
   return (
     <ContentContext.Provider
-      value={{ ...state, create, update, remove, getAll, getById, toggleLike, addComment, deleteComment }}
+      value={{ sermons, articles, books, memberPosts, create, update, remove, getAll, getById, toggleLike, addComment, deleteComment }}
     >
       {children}
     </ContentContext.Provider>
