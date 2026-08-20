@@ -1,11 +1,11 @@
 {
-  "name": "sbc-backend",
+  "name": "gcbc-backend",
   "version": "1.0.0",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
     "seed": "node seed.js"
   },
   "dependencies": {
