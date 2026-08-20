@@ -1,3 +1,4 @@
+import serverless from 'serverless-http';
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -69,3 +70,5 @@ connectDB()
     console.error('Failed to connect to MongoDB:', err.message);
     process.exit(1);
   });
+
+  export const handler = serverless(app);
