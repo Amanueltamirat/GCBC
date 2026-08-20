@@ -15,12 +15,28 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  'https://gcbc-1d76.onrender.com', // Production Render Frontend
+  'http://localhost:5173' // Local Vite Frontend
+];
+
 const corsOptions = {
-  origin: 'https://gcbc-1d76.onrender.com', 
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like Postman or mobile apps)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      // Dynamically returns the specific origin back to the browser
+      callback(null, true); 
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
-  credentials: true 
+  credentials: true // Required because your frontend is sending withCredentials
 };
+
 
 
 app.use(cors(corsOptions));

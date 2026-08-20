@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL:import.meta.NETLIFY_URL || 'https://gcbc-server.netlify.app/api',
+    withCredentials: true
 });
 
 api.interceptors.request.use((config) => {
